@@ -24,6 +24,11 @@ Table of Content:
         * Using RabbitMQ
         * Using ZeroMQ
         * Using SQLAlchemy
+    * Logging
+        * Fluentd
+        * Scribed
+        * Elastic
+        * Sentry Breadcrumb
     * Background Process
         * Web
         * Worker
@@ -34,7 +39,6 @@ Table of Content:
     * Best Practices
     * Authentication
     * Rate Limiting
-    * Logging
     * Advanced Options
     * Monitoring
     * API
