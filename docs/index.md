@@ -7,22 +7,13 @@ to be reliable, flexible, scalable, and high performance.
 Table of Content:
 
 * OSS
+    * Overview
     * Getting Started
-    * Concepts
-    * Best Practices
-    * Proxy
-    * Retry Policies
-    * Relay
-    * Authentication
-    * Logging
-    * Advanced Options
+    * Basic Concepts
+    * Installation
+    * Upgrading
+    * Configuration
     * Deployment
-    * Monitoring
-    * API
-    * Admin UI
-    * Middleware
-    * Error Handling
-    * SSL
     * Storage
         * Using Cassandra
         * Using MongoDB
@@ -37,7 +28,23 @@ Table of Content:
         * Web
         * Worker
         * Cron
+    * Proxy
+    * Retry Policies
+    * Relay
+    * Best Practices
+    * Authentication
+    * Rate Limiting
+    * Logging
+    * Advanced Options
+    * Monitoring
+    * API
+    * Command Line Interface
+    * Admin UI
+    * Middleware
+        * Email Alerting
+    * Error Handling
+    * SSL
     * Testing
     * Sharding
-    * FAQ
+    * Frequently Asked Questions
     * Troubleshooting
