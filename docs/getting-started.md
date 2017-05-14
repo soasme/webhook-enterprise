@@ -115,7 +115,7 @@ $ webhook-cli log --type message -n 1 --pretty
     "created_at": "2017-05-14T02:23:50+0000",
     ...(trucated)
 }
-``
+```
 
 We will also see at least one target log. This means that we successfully forwarded
 the message to target and got response from target.
