@@ -209,7 +209,7 @@ Resend the request is useful when your system is back to life.
 
 Let's call our system awake:
 
-```python
+```bash
 $ sed -i '' "s/return 500, 'MAINTENANCE'/return 200, 'OK'/" flask_app.py
 ```
 
@@ -217,7 +217,7 @@ Flask application reloads itself and respond 200 as status code again.
 
 We can use `webhook-cli send` to resend stored messages.
 
-```python
+```bash
 $ webhook-cli send --message-id "c68db85fd7a47d6c3ac5d3bbe9742dac"
 ```
 
