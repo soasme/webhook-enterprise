@@ -10,6 +10,7 @@ Table of Content:
     * Overview
     * Getting Started
     * Basic Concepts
+    * Features
     * Installation
     * Upgrading
     * Configuration
@@ -42,7 +43,7 @@ Table of Content:
     * Advanced Options
     * Monitoring
     * API
-    * Command Line Interface
+    * Command Line Interfaces
     * Admin UI
     * Middleware
         * Email Alerting
