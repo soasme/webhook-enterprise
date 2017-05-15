@@ -17,25 +17,30 @@ $ webhook-cli run api
 ```
 
 This launches a process handling incoming webhook requests. Yet we haven't
-had any webhook related configurations, so basically it responds webhook 404 as
-default behavior. Although we can curl `http://0.0.0.0:4698/health` for its health
-information:
+had any webhook settings, so basically it responds webhook HTTP 404 as
+default behavior. Anyway, we can curl `http://0.0.0.0:4698/health` for
+its health information:
 
 ```bash
 $ curl http://0.0.0.0:4698/health
 {"status": "running", "issues": []}
 ```
 
-## Start an Worker
+## Start a Worker
 
-To enable forwarding the request, we need to run Webhook-Enterprise workers.
-By running `webhook-cli run worker`, you can launch Webhook-Enterprise worker instance:
+To enable forwarding the message, we need to run Webhook-Enterprise workers.
+By running `webhook-cli run worker`, you can launch a Webhook-Enterprise
+worker process:
+
+```bash
+$ redis-server
+```
 
 ```bash
 $ webhook-cli run worker
 ```
 
-This launches a process consuming task sending jobs from message queue.
+This launches a process consuming task sending jobs from redis message queue.
 
 ## Source, Target and Message
 
@@ -49,18 +54,17 @@ These concepts are explained thoroughly in [Basic Concepts].
 
 Let's make it more functional now by adding a source and a target! 🤘
 
-We add a source named 'Curl Example'. When Webhook-Enterprise received request,
+We add a source named 'Curl Example'. When Webhook-Enterprise received requests,
 it will respond immediately with 200 as status code, '{"message": "ok"}' as
-JSON content.  CLI outputs the webhook url in the terminal.
+JSON content.  This command outputs the webhook url in the terminal.
 
 ```bash
 $ webhook-cli source add --name='Curl Example' \
   --status-code=200 \
   --content-type='application/json' \
-  --content='{"message": "ok"}'
+  --body='{"message": "ok"}'
 https://40d40092ddfcd570645c97b50a4a4cf7:aba8deb917b097e55fb932401c4d0d5b@0.0.0.0:4698/1
 ```
-
 As mentioned, we need a target service that Webhook-Enterprise forward the
 message to. Let's prepare a real target service:
 
@@ -85,8 +89,8 @@ $ python flask_app.py
 ```
 
 Now we've started a target service. Then we add a target named "Flask App".
-It forwards messages from "Curl Example" to "Flask App" and sets the
-webhook url of "Flask App" to "http://127.0.0.1:5000/webhook".
+It sets the webhook url of "Flask App" to "http://127.0.0.1:5000/webhook" and
+forwards messages from "Curl Example" to "Flask App".
 
 ```bash
 $ webhook-cli target add --name='Flask App' --forward-name "Curl Example"
@@ -95,8 +99,7 @@ $ webhook-cli target add --name='Flask App' --forward-name "Curl Example"
 
 ## Testing Proxy
 
-Below is a curl command posting JSON data to the url you just got when
-adding source:
+Below is a curl command posting JSON data to the url which you just got:
 
 ```bash
 $ curl https://40d40092ddfcd570645c97b50a4a4cf7:aba8deb917b097e55fb932401c4d0d5b@0.0.0.0:4698/1 \
@@ -106,12 +109,11 @@ $ curl https://40d40092ddfcd570645c97b50a4a4cf7:aba8deb917b097e55fb932401c4d0d5b
 We will see an source request log. This means that we successfully received a request.
 
 ```bash
-$ webhook-cli log --type message -n 1 --pretty
+$ webhook-cli log --type "event.created" -n 1 --pretty
 {
     "id": "c68db85fd7a47d6c3ac5d3bbe9742dac",
-    "type": "message",
+    "type": "event.created",
     "user-agent": "curl/7.51.0",
-    "payload": {"data": {}},
     "created_at": "2017-05-14T02:23:50+0000",
     ...(trucated)
 }
@@ -121,16 +123,11 @@ We will also see at least one target log. This means that we successfully forwar
 the message to target and got response from target.
 
 ```bash
-$ webhook-cli log --type target.response -n 1 --pretty
+$ webhook-cli log --type "event.forwarded" -n 1 --pretty
 {
     "id": "cbf67e4afcba55b93e04253628096f0d",
-    "type": "target.response",
-    "source": {
-        "id": "c68db85fd7a47d6c3ac5d3bbe9742dac"
-    },
-    "response": {
-        "status_code": 200,
-    }
+    "type": "event.forwarded",
+    "forward_id": "c68db85fd7a47d6c3ac5d3bbe9742dac"
     ... (trucated)
 }
 ```
@@ -159,41 +156,32 @@ There are several built-in retry policies. The default one is linear interval.
 Let's view what's happening:
 
 ```bash
-$ webhook-cli log --type message -n 1 --pretty
+$ webhook-cli log --type event.created -n 1 --pretty
 {
     "id": "f6b9cf92a375205433bd0aa353f1864b",
-    "type": "message",
+    "type": "event.created",
     "user-agent": "curl/7.51.0",
-    "payload": {"data": {}},
     "created_at": "2017-05-14T02:30:00+0000",
     ...(trucated)
 }
 ```
 
 ```bash
-$ webhook-cli log -f --type target.response --pretty
+$ webhook-cli log -f --type event.forwarded --pretty
 {
     "id": "773b29af2cb07dd58e626f4e0c1c3dc2",
-    "type": "target.response",
-    "source": {
-        "id": "c68db85fd7a47d6c3ac5d3bbe9742dac"
-    },
-    "response": {
-        "status_code": 500,
-    },
+    "type": "event.forwarded",
+    "status": "failed",
+    "forward_id": "c68db85fd7a47d6c3ac5d3bbe9742dac",
     "created_at": "2017-05-14T02:30:00+0000",
     "next_run_at": "2017-05-14T02:31:00+0000",
     ... (trucated)
 }
 {
     "id": "ab83fb20f20861aef970e4ede3cadfb5",
-    "type": "target.response",
-    "source": {
-        "id": "c68db85fd7a47d6c3ac5d3bbe9742dac"
-    },
-    "response": {
-        "status_code": 500,
-    },
+    "type": "event.forwarded",
+    "status": "failed",
+    "forward_id": "c68db85fd7a47d6c3ac5d3bbe9742dac",
     "created_at": "2017-05-14T02:31:00+0000",
     "next_run_at": "2017-05-14T02:32:00+0000",
     ... (trucated)
@@ -224,17 +212,14 @@ $ webhook-cli send --message-id "c68db85fd7a47d6c3ac5d3bbe9742dac"
 This time we should get a successful response from target system:
 
 ```bash
-$ webhook-cli log --type target.response -n 1 --pretty
+$ webhook-cli log --type event.forwarded -n 1 --pretty
 {
     "id": "d3172ac3165389357a398383eea3faa9",
-    "type": "target.response",
-    "source": {
-        "id": "c68db85fd7a47d6c3ac5d3bbe9742dac"
-    },
-    "response": {
-        "status_code": 200,
-    }
+    "type": "event.forwarded",
+    "status": "success",
+    "forward_id": "c68db85fd7a47d6c3ac5d3bbe9742dac",
     ... (trucated)
+}
 ```
 
 ## Next Step
