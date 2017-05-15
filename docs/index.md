@@ -8,8 +8,8 @@ Table of Content:
 
 * OSS
     * Overview
-    * Getting Started
-    * Basic Concepts
+    * [Getting Started](/docs/getting-started.md)
+    * [Basic Concepts](/docs/basic-concepts.md)
     * Features
     * Installation
     * Upgrading
